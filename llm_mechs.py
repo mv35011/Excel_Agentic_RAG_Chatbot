@@ -19,21 +19,23 @@ from langchain.tools import Tool
 from datetime import datetime
 from langchain.chains import RetrievalQA
 from langchain.embeddings import OllamaEmbeddings
+from langchain_cohere import CohereEmbeddings
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv
 
 load_dotenv()
 groq_api_key = os.getenv("GROQ_API_KEY")
-
+cohere_api_key = os.getenv("COHERE_API_KEY")
 
 class RAGSystem:
     # Initailizing the llm, vectordb, agent executer, memory buffer(for streamlit app if made), qa_chain for fallback
     def __init__(self, groq_api_key):
         # self.embeddings = ollamaEmbeddings("llama2)
-        self.embeddings = HuggingFaceBgeEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2",
-            model_kwargs={'device': 'cpu'}
-        )
+        # self.embeddings = HuggingFaceBgeEmbeddings(
+        #     model_name="sentence-transformers/all-MiniLM-L6-v2",
+        #     model_kwargs={'device': 'cpu'}
+        # )
+        self.embeddings = CohereEmbeddings(model="embed-english-light-v3.0", cohere_api_key=cohere_api_key)
         self.llm = ChatGroq(
             model_name="llama-3.3-70b-versatile",
             groq_api_key=groq_api_key,
@@ -348,7 +350,7 @@ class RAGSystem:
                 agent=agent,
                 tools=tools,
                 verbose=True,
-                max_iterations=7,
+                max_iterations=8,
                 memory=self.memory,
                 handle_parsing_errors=True
             )
